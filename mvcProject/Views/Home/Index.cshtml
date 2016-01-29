@@ -1,0 +1,94 @@
+﻿
+@{
+    Layout = "~/Areas/mvcProject/Views/Shared/_Layout.cshtml";
+    
+}
+
+@model BP.Areas.mvcProject.Models.SUser
+@{
+    ViewBag.Title = "Профиль";
+}
+@System.Web.Optimization.Styles.Render("~/Content/styles")
+@System.Web.Optimization.Scripts.Render("~/bundles/jquery")
+<div class="jumbotron">
+    <h2>
+        @ViewBag.Title
+    </h2>
+</div>
+
+<style>
+    td {
+        width: auto;
+    }
+</style>
+
+@using (Html.BeginForm(method: FormMethod.Post, actionName: "index", controllerName: "home"))
+{   @Html.ValidationSummary(true)
+    <div class="table-responsive">
+        <table class="table table-bordered" style="width:auto">
+
+
+            <tr>
+    <td>
+        @Html.Label("Имя пользователя: ") <br>
+
+    </td>
+    <td><b>@Html.DisplayFor(m => m.SUserLogin, new { style = "width:250px" })</b></td>
+    @Html.ValidationMessageFor(m => m.SUserLogin)
+        </tr>
+            <tr>
+                <td>
+                    @Html.Label("Фамилия: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserSur, new { style = "width:250px" })</td>
+              @Html.ValidationMessageFor(m => m.SUserSur)
+            </tr>
+            <tr>
+                <td>
+                    @Html.Label("Имя: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserFirst, new { style = "width:250px" })</td>
+           @Html.ValidationMessageFor(m => m.SUserFirst)
+            </tr>
+            <tr>
+                <td>
+                    @Html.Label("Отчество: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserPatr, new { style = "width:250px" })</td>
+              @Html.ValidationMessageFor(m => m.SUserPatr)
+            </tr>
+            <tr>
+                <td>
+                    @Html.Label("Должность: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserPost, new { style = "width:250px" })</td>
+                    @Html.ValidationMessageFor(m => m.SUserPost)
+            </tr>
+            <tr>
+                <td>
+                    @Html.Label("Телефон: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserPhone, new { style = "width:250px" })</td>
+                @Html.ValidationMessageFor(m => m.SUserPhone)
+            </tr>
+            <tr>
+                <td>
+                    @Html.Label("Email: ") <br>
+
+                </td>
+                <td>@Html.TextBoxFor(m => m.SUserEmail, new { style = "width:250px" })</td>
+                @Html.ValidationMessageFor(m => m.SUserEmail)
+            </tr>
+        </table>
+      
+        <input type="submit" style="width:100px" onclick="action = 'Index',method='post'; " value="Сохранить" class="btn btn-block btn-primary" />
+        
+
+    </div>
+
+}

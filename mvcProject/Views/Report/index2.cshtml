@@ -1,0 +1,62 @@
+﻿@{
+    Layout = null;
+ }
+<body>
+    <div data-bind="jqTabs: tabs">
+        <ul data-bind="foreach: tabs">
+            <li>
+                <a href="#tab-${id}" data-bind="text: title, attr: { href: '#tab-' + id() }"></a>
+            </li>
+        </ul>
+        <!-- ko foreach: tabs -->
+        <div data-bind="attr: { id: 'tab-' + id() }">
+            <h2 data-bind="text: id() + ' - ' + title()"></h2>
+            <p data-bind="text: content"></p>
+        </div>
+        <!-- /ko -->
+    </div>
+</body>
+
+
+
+<button data-bind="click: addTab">Add Tab</button>
+
+@System.Web.Optimization.Scripts.Render("~/bundles/jquery")
+@System.Web.Optimization.Scripts.Render("~/bundles/jqueryui")
+@System.Web.Optimization.Scripts.Render("~/bundles/knockout")
+@System.Web.Optimization.Scripts.Render("~/bundles/knockoutmapping")
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            ko.bindingHandlers.jqTabs = {
+                update: function (element, valueAccessor, allBindingsAccessor) {
+                    var dependency = ko.utils.unwrapObservable(valueAccessor()),
+                        currentIndex = $(element).tabs("option", "selected") || 0,
+                        config = ko.utils.unwrapObservable(allBindingsAccessor().jqTabOptions) || {};
+                    setTimeout(function () {
+                        $(element).tabs("destroy").tabs(config).tabs("option", "selected", currentIndex);
+                    }, 0);
+                }
+            };
+
+
+            function Tab(id, title, content) {
+                this.id = ko.observable(id);
+                this.title = ko.observable(title);
+                this.content = ko.observable(content);
+            }
+
+            var viewModel = {
+                tabs: ko.observableArray([new Tab(1, "one", "one content"), new Tab(2, "two", "two content"), new Tab(3, "three", "three content")]),
+                addTab: function () {
+                    var newId = this.tabs().length;
+                    this.tabs.push(new Tab(newId, "new" + newId, "new content" + newId));
+                }
+            };
+            $("ul.tabs").tabs();
+            ko.applyBindings(viewModel);
+        });
+   
+</script>
+   

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  
+    @System.Web.Optimization.Styles.Render("~/Content/layoutBundle")
+    <link id="Link1"  rel="shortcut icon" href="~/favicon.ico" type="image/x-icon" />
+    <link id="Link2"  rel="icon" href="~/favicon.ico" type="image/ico" />
+    <title>БПиУП</title>
+</head>
+<body>
+    @RenderSection("preloadScripts", false)
+        <nav role="navigation" class="navbar navbar-default  navbar-fixed-top">
+            <div class="container-header">
+                <div class="navbar-header">
+                    <button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <img id="imgLogo"  src="~/img/logo.gif" class="navbar-brand" />
+                    <a id="LinkIcon" href="~/" class="navbar-brand"> Автоматизированная информационная система <br /> бизнес-планирования и управлением предприятием</a>
+
+                </div>
+                <div id="Div1" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                 
+                                <ul>
+                                    &#160;
+                                </ul>
+                                <ul class="nav navbar-user">
+                                    <li class="dropdown">
+                                        @{
+                                            if (BP.UserClasses.User.FullName != null)
+                                            {<asp:HyperLink ID="hlUserLogin" data-toggle="dropdown" class="dropdown-toggle">@BP.UserClasses.User.GetUserFullName() <b class="caret">  </b> &#160; &#160;&#160; &#160; </asp:HyperLink>
+                                                <ul role="menu" class="dropdown-menu">
+                                                    <li><a href="@Request.ApplicationPath/mvcproject/home/index">Профиль</li>
+                                                    <li><a id="ChangePassword" href="~/ChangePassword.aspx">Сменить пароль</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a id="ExitnLink" href="~/Login.aspx">Выйти</a></li>
+                                                </ul>
+                                            }
+                                            else
+                                            {  
+                                                <ul class="nav navbar-user">
+                                            <li><a id="loginLink" href="~/Login.aspx">Вход</a></li>
+                                        </ul>
+                                            }
+                                        }
+                                    </li>
+                                </ul>
+                    </ul>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <!-- Collection of nav links, forms, and other content for toggling -->
+                <div id="navbarCollapse" class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="active"><a id="IndexLink"   href="~/">Главная</a></li>
+                                <li class="dropdown">
+                                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">Операции <b class="caret"></b></a>
+                                    <ul role="menu" class="dropdown-menu">
+                                        <li><a id="LinkImportData"   href="~/Pages/DounloadFiles.aspx">Импорт данных</a></li>   
+                                        <li><a id="LinkMainForm"   href="~/Pages/Forms/MainForm.aspx">Формы ввода</a></li>
+                                        <li><a id="LinkModels"   href="~/Pages/FormTemplates/Manage.aspx">Шаблоны</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Другие операции</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#">Отчетные формы</a></li>
+                                <li class="dropdown">
+                                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">Справочная информация <b class="caret"></b></a>
+                                    <ul role="menu" class="dropdown-menu">
+                                        <li><a id="A4"   href="~/mvcproject/nsi/manage">Документы</a></li>
+                                            <li><a id="A2"   href="~/mvcproject/SLineGraf/SLineGraf">SLineGraf</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">Сервисные функции <b class="caret"></b></a>
+                                    <ul role="menu" class="dropdown-menu">
+                                        <li><a id="LinkSavePeriod"   href="~/Pages/SavePeriod.aspx">Отчетный период</a></li>
+                                        <li><a id="LinkAdministrator"   href="~/Administrator.aspx">Администрирование</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+            
+
+
+                </div>
+             
+            </div>
+        </nav>
+
+        <div class="container-fluid body-content">
+            @RenderBody()
+        </div>
+
+        @System.Web.Optimization.Scripts.Render("~/bundles/layoutBundle")
+        @RenderSection("scripts", false)
+</body>
+</html>

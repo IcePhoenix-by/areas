@@ -1,0 +1,414 @@
+﻿@model BP.Areas.mvcProject.Models.Nsi.FormCatalog
+
+@{
+    Layout = "~/Areas/mvcProject/Views/Shared/_Layout.cshtml";
+}
+
+<div class="filters">
+    <label><input type="radio" name="filter" value="published" data-bind="checked: filterName" />Опубликованные</label>
+    <label><input type="radio" name="filter" value="projects" data-bind="checked: filterName" />Проекты</label>
+    <label><input type="radio" name="filter" value="current" data-bind="checked: filterName" />Действующие</label>
+    <label><input type="radio" name="filter" value="closed" data-bind="checked: filterName" />Закрытые</label>
+    <button type="button" id="btn-show-filters" style="margin-left: 50px;" data-bind="click: toggleFilters, text: filtersAreVisible() ? 'Спрятать фильтры' : 'Показать фильтры'"></button>
+</div>
+
+<div class="tabs">
+    <ul class="tab-links">
+        <li class="active"><a href="#input-forms">Формы ввода</a></li>
+        <li><a href="#report-forms">Отчетные формы</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="input-forms" class="tab active" data-bind="template: {name: 'tmpl-form-table', data: inputForms}"></div>
+        <div id="report-forms" class="tab" data-bind="template: {name: 'tmpl-form-table', data: reportForms}"></div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/knockout-3.4.0.js"></script>
+    @*<script src="~/Scripts/knockout.mapping.js"></script>*@
+
+    <script id="tmpl-form-table" type="text/html">
+        <table class="table max form-table overlay-owner" data-bind="css: {'col-filters-visible': $root.filtersAreVisible()}">
+            <thead>
+                <tr class="info">
+                    <th><div class="col-filter-container">Группа</div></th>
+                    <th><div class="col-filter-container">Код и наименование</div></th>
+                    <th>
+                        <div class="col-filter-container">
+                        Периодичность
+                        <select class="col-filter" data-bind="visible: $root.filtersAreVisible">
+                            <option style="font-style: italic">Любая</option>
+                            <option>Ежемесячно</option>
+                            <option>Ежеквартально</option>
+                        </select>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="col-filter-container">
+                        Дата начала
+                        <select class="col-filter" data-bind="visible: $root.filtersAreVisible">
+                            <option style="font-style: italic">Любая</option>
+                            <option>01.2015</option>
+                            <option>08.2015</option>
+                        </select>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="col-filter-container">
+                        Дата окончания
+                        <select class="col-filter" data-bind="visible: $root.filtersAreVisible">
+                            <option style="font-style: italic">Любая</option>
+                        </select>
+                        </div>
+                    </th>
+                    <th><div class="col-filter-container">Филиалы / структурные подразделения</div></th>
+                </tr>
+            </thead>
+            <tbody data-bind="customForeach: { data: $data, afterRenderAll: $root.mergeRows }">
+                @*<tr class="table-filter" data-bind="visible: $root.filtersAreVisible">
+                    <td colspan="6">
+                        <ol class="tree-list">
+                            <li><span class="subtree-icon collapsed"></span><label><input type="checkbox">Филиал</label></li>
+                            <li>
+                                <span class="subtree-icon expanded"></span><label><input type="checkbox">Филиал</label>
+                                <ol>
+                                    <li><span class="subtree-icon"></span><label><input type="checkbox">СП</label></li>
+                                    <li><span class="subtree-icon"></span><label><input type="checkbox">СП</label></li>
+                                    <li><span class="subtree-icon"></span><label><input type="checkbox">СП</label></li>
+                                    <li><span class="subtree-icon"></span><label><input type="checkbox">СП</label></li>
+                                </ol>
+                            </li>
+                            <li><span class="subtree-icon"></span><label><input type="checkbox">Филиал</label></li>
+                        </ol>
+                        <ol class="tree-list" data-bind="template: {name: 'tmpl-branches-level', data: $root.branchTree.subBranches}"></ol>
+
+                    </td>
+                </tr>*@
+                <tr>
+                    <td colspan="6" data-bind="text: Key.TypeName"></td>
+                </tr>
+                <!-- ko foreach: $data.Records -->
+                <tr>
+                    <td data-bind="text: GroupName"></td>
+                    <td><span data-bind="text: Code"></span>&nbsp;&nbsp;&nbsp;<span data-bind="text: Name"></span></td>
+                    <td data-bind="text: Period"></td>
+                    <td data-bind="textToDate: DateStarts" class="monospaced"></td>
+                    <td data-bind="text: DateEnds" class="monospaced"></td>
+                    <td class="overlay-holder">
+                        <div class="overlay-tab">
+                            <a class="subtable-link" data-bind="attr: {'href': '@Url.Action("Manage", "Nsi")/' + Id}, click: $root.showBranches"><div class="icon icon-subtable"></div></a>
+                        </div>
+                        <div data-bind="template: {name: 'tmpl-branches-table', data: Branches}"></div>
+                    </td>
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </script>
+
+    <script id="tmpl-branches-table" type="text/html">
+        @*<table class="table overlay">*@
+        <table class="table overlay" data-bind="with: $data">
+            <thead>
+                <tr class="info">
+                    <th>Филиал</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                </tr>
+            </thead>
+            <tbody data-bind="customForeach: { data: $data, afterRenderAll: $root.showOverlay }">
+                <tr>
+                    <td><span data-bind="text: Code"></span>&nbsp;&nbsp;&nbsp;<span data-bind="text: Name"></span></td>
+                    <td data-bind="text: DateStarts" class="monospaced"></td>
+                    <td data-bind="text: DateEnds" class="monospaced"></td>
+                </tr>
+            </tbody>
+        </table>
+    </script>
+
+
+    <script id="tmpl-branches-level" type="text/html">
+        <li><span class="tree-expander"></span><label class="all-selector"><input type="checkbox" name="allBranches" />Все филиалы</label></li>
+        <!-- ko foreach: $data -->
+        <li data-bind="css: { expanded: expanded }">
+            <span class="tree-expander" data-bind="click: toggleSubBranches"></span><label><input type="checkbox"/><span data-bind="text: branch.Name"></span></label>
+            <!-- ko if: typeof subBranches != 'undefined'  -->
+            <ol data-bind="template: { name: 'tmpl-sub-branches-level', data: subBranches }, visible: expanded"></ol>
+            <!-- /ko -->
+        </li>
+        <!-- /ko -->
+    </script>
+
+    <script id="tmpl-sub-branches-level" type="text/html">
+        <li><span class="tree-expander"></span><label class="all-selector"><input type="checkbox" name="allSubBranches" />Все подразделения</label></li>
+        <!-- ko foreach: $data -->
+        <li><span class="tree-expander"></span><label><input type="checkbox"/><span data-bind="text: branch.Name"></span></label></li>
+        <!-- /ko -->
+    </script>
+
+
+    @*<script id="tmpl-branches-tree" type="text/html">
+        <ol class="tree-list" data-bind="foreach: $data">
+            <li><label><input type="checkbox"><span data-bind="text: Code"></span>&nbsp;&nbsp;&nbsp;<span data-bind="text: Name"></span></label></li>
+        </ol>
+    </script>
+
+    <script id="tmplBranchesTable" type="text/html">
+        <a href="#">Спрятать</a>
+    </script>*@
+
+    <script type="text/javascript">
+
+        ko.bindingHandlers.textToDate = {
+            update: function(element, valueAccessor){
+                var value = ko.utils.unwrapObservable(valueAccessor());
+                element.textContent = ('0' + value.getDate()).slice(-2) + "." + ('0' + (value.getMonth() + 1)).slice(-2) + "." + value.getFullYear();
+            }
+        };
+
+        ko.bindingHandlers.customForeach = {
+            init: ko.bindingHandlers.foreach.init,
+            update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+                var options = ko.unwrap(valueAccessor());
+                ko.unwrap(options.data); // needed to set a dependency
+                //if (options.beforeRenderAll) {
+                //    options.beforeRenderAll();
+                //}
+                ko.bindingHandlers.foreach.update(element, valueAccessor, allBindings, viewModel, bindingContext);
+                if (options.afterRenderAll) {
+                    options.afterRenderAll(element);
+                }
+            }
+        };
+
+
+        var overlay = new function(){
+            this.show = function(overlay, holder, owner){
+
+                var $overlay = $(overlay);
+                var $holder;
+                var $owner;
+
+                if(holder){
+                    $holder = $(holder);
+                }
+                else{
+                    $holder = $overlay.parent().closest(".overlay-holder");
+                }
+
+                if(owner){
+                    $owner = $(owner);
+                }
+                else{
+                    $owner = $holder.closest(".overlay-owner");
+                }
+                var width = $overlay.css("width");
+                $overlay.css("min-width", width);
+                var margin = $overlay.css("margin-right").replace("px", "");
+                $overlay.removeClass("overlay");
+                $overlay.addClass("overlay-visible");
+                //сделать ли holder опциональным?
+                $holder.removeClass("overlay-holder");
+                $holder.addClass("overlay-visible-holder");
+                var correction = $overlay.offset().left + $overlay.width() + margin - $owner.offset().left - $owner.width();
+                if(correction > 0){
+                    $overlay.css("left", -correction);
+                }
+                $overlay.width(width);
+            };
+
+            this.hide = function(overlay, holder, owner){
+                var $overlay = $(overlay);
+                var $holder;
+                var $owner;
+
+                if(holder){
+                    $holder = $(holder);
+                }
+                else{
+                    $holder = $overlay.parent().closest(".overlay-visible-holder");
+                }
+
+                if(owner){
+                    $owner = $(owner);
+                }
+                else{
+                    $owner = $holder.closest(".overlay-owner");
+                }
+
+                $overlay.removeClass("overlay-visible");
+                $overlay.addClass("overlay");
+                $holder.removeClass("overlay-visible-holder")
+                $holder.addClass("overlay-holder");
+            };
+        };
+
+
+        //var Tree = function TreeNode(branchTree){
+        //    var self = this;
+        //    this.branch = branchTree.Branch;
+        //    this.selected = ko.observable(true);
+        //    if(branchTree.SubBranches){
+        //        this.subBranches = [];
+        //        this.expanded = ko.observable(false);
+        //        branchTree.SubBranches.forEach(function(branch){
+        //            self.subBranches.push(new TreeNode(branch));
+        //        });
+        //    }
+        //};
+
+        //Tree.prototype.toggleSubBranches = function(treeNode){
+        //    treeNode.expanded(! treeNode.expanded());
+        //};
+
+
+        var viewModel = new function ViewModel(model) {
+            var self = this;
+
+            self.time = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewData["Time"], new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter()));
+
+            var allForms = model.GroupedRecords;
+
+            //self.branchTree = new Tree(model.BranchTree);
+
+            //self.uiBranchTree = new Tree(model.BranchTree);
+
+            self.filterName = ko.observable("published");
+
+            self.filter = ko.computed(function () {
+                switch (self.filterName()) {
+                    case "published":
+                        return function (form) {
+                            return (form.PublishDate !== null) && (form.DateStarts <= self.time && ((form.DateEnds === null) || form.DateEnds >= self.time)) ;
+                        };
+                    case "projects":
+                        return function (form) {
+                            return form.PublishDate === null;
+                        };
+                    case "current":
+                        return function (form) {
+                            return (form.DateStarts <= self.time) && ((form.DateEnds === null) || (form.DateEnds >= self.time));
+                        };
+                    case "closed":
+                        return function (form) {
+                            return form.DateEnds !== null;
+                        };
+                }
+            });
+
+            self.filtersAreVisible = ko.observable(false);
+
+            self.toggleFilters = function(){
+                self.filtersAreVisible(! self.filtersAreVisible());
+            }
+
+            self.allInputForms = allForms.filter(function (group) {
+                return group.Key.TypeId === 1;
+            });
+
+            self.allReportForms = allForms.filter(function (group) {
+                return group.Key.TypeId !== 1;
+            });
+
+            self.inputForms = ko.computed(function () {
+                return filterGrouped(self.allInputForms, self.filter());
+            });
+
+            self.reportForms = ko.computed(function () {
+                return filterGrouped(self.allReportForms, self.filter());
+            });
+
+            self.mergeRows = function(table){
+                mergeCommonRows($(table), 1);
+            };
+
+            self.showBranches = function(form, event){
+                if(form.BranchesDetailed()){
+                    //self.hideOverlapable(event.target);
+                    self.hideOverlay(event.target);
+                    form.Branches(null);
+                    form.BranchesDetailed(false);
+                }
+                else{
+                    $.get("/bp/mvcproject/nsi/formbranches/" + form.Id, form.Branches);
+                    form.BranchesDetailed(true);
+                }
+            };
+
+            self.showOverlay = function(element){
+                overlay.show($(element).closest(".overlay")[0]);
+            };
+
+            self.hideOverlay = function(element){
+                overlay.hide($(element).closest(".overlay-visible-holder").find(".overlay-visible:first")[0]);
+            };
+
+            function filterGrouped(arr, predicate) {
+                return arr.map(function (group) {
+                    var newGroup = {};
+                    newGroup.Key = group.Key;
+                    newGroup.Records = group.Records.filter(predicate);
+
+                    return newGroup;
+                });
+            }
+
+            function extend(model){
+                model.Branches = ko.observable(null);
+                model.BranchesDetailed = ko.observable(false);
+            };
+                           
+
+            function forEachGrouped(arr, action){
+                arr.forEach(function(group){
+                    group.Records.forEach(action);
+                });
+            };
+
+            forEachGrouped(allForms, extend);
+        }(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model, new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter())));
+
+        ko.applyBindings(viewModel);
+            
+        function mergeCommonRows($table, colIndex) {
+            //alert("мержим...");
+            var firstColumnBrakes = [];
+            // iterate through the columns instead of passing each column as function parameter:
+            //table.find("th:nth-child(" + colIndex + ")");
+            //for (var i = 1; i <= table.find('th').length; i++) {
+            var previous = null, cellToExtend = null, rowspan = 1;
+            $table.find("td:nth-child(" + colIndex + ")").each(function (index, e) {
+                var $this = $(this), content = $this.text();
+                // check if current row "break" exist in the array. If not, then extend rowspan:
+                if (previous == content && content !== "" && $.inArray(index, firstColumnBrakes) === -1) {
+                    // hide the row instead of remove(), so the DOM index won't "move" inside loop.
+                    $this.addClass('hidden');
+                    cellToExtend.attr("rowspan", (rowspan = rowspan + 1));
+                } else {
+                    // store row breaks only for the first column:
+                    if (colIndex === 1) firstColumnBrakes.push(index);
+                    rowspan = 1;
+                    previous = content;
+                    cellToExtend = $this;
+                }
+            });
+            //}
+            // now remove hidden td's (or leave them hidden if you wish):
+            //$('td.hidden').remove();
+        }
+
+        $(document).ready(function () {
+            $('.tabs .tab-links a').on('click', function (e) {
+                var currentAttrValue = $(this).attr('href');
+
+                // Show/Hide Tabs
+                $('.tabs ' + currentAttrValue).show().siblings().hide();
+
+                // Change/remove current tab to active
+                $(this).parent('li').addClass('active').siblings().removeClass('active');
+
+                e.preventDefault();
+            });
+        });
+    </script>                
+}

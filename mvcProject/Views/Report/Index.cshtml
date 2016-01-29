@@ -1,0 +1,191 @@
+﻿
+@{
+    Layout = "~/Areas/mvcProject/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script type="text/html" id="tree-node">
+        <li>
+            <span class="node-toggle" data-bind="visible: expanded, click: toggle">&ndash;</span>
+            <span class="node-toggle" data-bind="visible: collapsed, click: toggle">+</span>
+            <span class="node-label" data-bind="text: SBranchName, click: $root.selected2"></span>
+            <div data-bind="if: expanded">
+                <ul data-bind="template: {name: 'tree-node', foreach: items}"></ul>
+            </div>
+        </li>
+    </script>
+
+</head>
+<body>
+    <ul data-bind="template: {name: 'tree-node', data: root}"></ul>
+    <div data-bind="if: selected">
+        <div data-bind="with: selected">
+            Selected Node: <span data-bind="text: SBranchName"></span>
+            Parent: <span data-bind="text: parentIds"></span>
+        </div>
+    </div>
+    <div data-bind="jqTabs: { fx: { opacity: 'toggle' } }">
+        <ul data-bind="foreach: tabs">
+            <li>
+                <a data-bind="attr:{href:'#tab-' + id()}, text:id"></a>
+            </li>
+        </ul>
+        <!-- ko foreach: tabs -->
+        <div data-bind="attr: {id: 'tab-'+id()}, template: { name: 'tabTmpl', data: $data }"></div>
+        <!-- /ko -->
+    </div>
+
+    <script id="tabTmpl" type="text/html">
+        <div data-bind="template: { name: titleTmpl, data: titleData }"></div>
+        <div data-bind="template: { name: contentTmpl, data: contentData }"></div>
+    </script>
+    <script id="normalTitleTmpl" type="text/html">
+        <h2 data-bind="text: name + ' - '"></h2>
+    </script>
+    <script id="normalContentTmpl" type="text/html">
+        <p data-bind="foreach: content"></p>
+    </script>
+
+
+
+
+
+
+</body>
+@System.Web.Optimization.Scripts.Render("~/bundles/jquery")
+@System.Web.Optimization.Scripts.Render("~/bundles/knockout")
+@System.Web.Optimization.Scripts.Render("~/bundles/knockoutmapping")
+@section scripts{
+
+    <script type="text/javascript">
+        $(function () {
+            function TreeNode(values) {
+                var self = this;
+                ko.mapping.fromJS(values, { items: { create: createNode } }, this);
+                this.expanded = ko.observable(false);
+                for (var i = 0; i < this.items().length; i++)
+                    this.items()[i].parent = this;
+                this.parentIds = [];
+                this.collapsed = ko.computed(function () {
+                    return !self.expanded();
+                })
+            }
+
+            TreeNode.prototype.toggle = function () {
+                this.expanded(!this.expanded());
+            };
+
+            function createNode(options) {
+                return new TreeNode(options.data);
+            }
+            var Branch = new TreeNode((function () {
+                var Branch = null;
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'url': "/bp/mvcproject/report/gettree",
+                    'dataType': "Json",
+                    'success': function (data) {
+                        Branch = data;
+                    }
+                });
+                return Branch;
+            })());
+
+            function setParents(rootNode) {
+                if (ko.isObservable(rootNode.items) && rootNode.items().length)
+                    for (var i = 0; i < rootNode.items().length; i++) {
+                        if (rootNode.items()[i].parent)
+                            rootNode.items()[i].parentIds = rootNode.items()[i].parent.parentIds.slice(0);
+                        rootNode.items()[i].parentIds.push(rootNode.items()[i].parent.SBranchId())
+                        setParents(rootNode.items()[i]);
+                    }
+            }
+            setParents(Branch);
+
+            function Tab(id, title, titleTmpl, content, contentTmpl) {
+                return {
+                    id: ko.observable(id),
+                    titleData: ko.observable(title),
+                    titleTmpl: titleTmpl,
+                    contentData: ko.observableArray(content),
+                    contentTmpl: contentTmpl
+                };
+            };
+            var viewModel = new function () {
+                var self = this;
+
+
+               
+                self.tabs = ko.observableArray();
+                self.root = Branch;
+
+                self.selected2 = function (data2)
+                {
+                    var a = data2.SBranchId();
+                    var gettabs = null;
+                    $.ajax({
+                        'async': false,
+                        'global': false,
+                        'data': {'id': a},
+                        'url': "/bp/mvcproject/report/gettabs",
+                        'dataType': "Json",
+                        'success': function (data) {
+                            gettabs = data;
+                            self.tabs.removeAll();
+                            for (var i = 0; i < data.length; i++) {
+                              
+                                self.tabs.push(new Tab(data[i].StypeFormId, { name: data[i].STypeFormName}, "normalTitleTmpl", { content: data[i].items }, "normalContentTmpl"));
+                            }
+                        }
+                    });
+
+                    return gettabs;
+                };
+             
+                self.gettabs = function ()
+                {
+                    self.selected = ko.observable();
+                    var gettabs = null;
+                    $.ajax({
+                        'async': false,
+                        'global': false,
+                        'url': "/bp/mvcproject/report/gettabs",
+                        'dataType': "Json",
+                        'success': function (data) {
+                            gettabs = data;
+                        }
+                    });
+                    return gettabs;
+                }();
+                self.tabs3 = self.gettabs;
+
+                self.inicialiseTabs = new function () {
+                    for (var i = 0; i < self.tabs3.length ; i++) {
+                        self.tabs.push(new Tab(self.tabs3[i].StypeFormId, { name: self.tabs3[i].STypeFormName, date: new Date() }, "normalTitleTmpl", { content: "one content", date: new Date() }, "normalContentTmpl"));
+                    }
+                }();
+
+            }
+                ko.bindingHandlers.jqTabs = {
+                    init: function (element, valueAccessor) {
+                        var options = valueAccessor() || {};
+                        setTimeout(function () { $(element).tabs(options); }, 0);
+                    }
+                };
+
+
+                function Tab(id, title, titleTmpl, content, contentTmpl) {
+                    return {
+                        id: ko.observable(id),
+                        titleData: ko.observable(title),
+                        titleTmpl: titleTmpl,
+                        contentData: ko.observable(content),
+                        contentTmpl: contentTmpl
+                    };
+                }
+
+                ko.applyBindings(viewModel, $('html')[0]);
+            });
+
+    </script>
+}
